@@ -1,0 +1,8 @@
+%td= object.namespace
+%td= object.resource
+%td= object.owner
+%td= object.expires
+-# %td= format_datetime object.expires TODO: format iso
+%td.actions= smart_listing_item_actions [{name: :edit, url: edit_lock_path(object)}, {name: :destroy, url: lock_path(object), confirmation: "Are you sure you want to delete this lock?"}]
+
+

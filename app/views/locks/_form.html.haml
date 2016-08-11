@@ -1,0 +1,29 @@
+%td{colspan: 6}
+  = form_for object, url: object.new_record? ? locks_path : lock_path(object),
+                     remote: true, html: {class: "form-horizontal"} do |f|
+
+    -# Form fields go here...
+      %div
+      Namespace:
+      = f.text_field :namespace
+      %div
+      Resource:
+      = f.text_field :resource
+      %div
+      Owner:
+      = f.text_field :owner
+      %div
+      Expires:
+      = f.text_field :expires
+    %p
+      Namespace:
+      = f.text_field(:namespace)
+      Resource:
+      = f.text_field :resource
+      Owner:
+      = f.text_field :owner
+      Expires:
+      = f.text_field :expires
+
+      = f.submit "Save", class: "btn btn-primary"
+      %button.btn.btn-link.cancel Cancel

@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  namespace: MyString
+  resource: MyString
+  expires: 2016-08-06 00:25:09
+
+two:
+  namespace: MyString
+  resource: MyString
+  expires: 2016-08-06 00:25:09

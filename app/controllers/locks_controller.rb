@@ -36,6 +36,11 @@ class LocksController < ApplicationController
     # puts params
     @lock = Lock.find(params[:id])
 
+    unless auth_admin? || lock_params[:lock][:owner] == @lock.owner
+      logger.error "owner #{lock_params[:lock][:owner]} tried to steal from #{@lock.owner}: #{@lock.namespace} #{@lock.resource}"
+      authz_forbidden!
+    end
+
     @lock.update(lock_params)
   end
 

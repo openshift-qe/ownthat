@@ -53,4 +53,5 @@ Rails.application.configure do
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
   config.active_record.table_name_prefix = "ownthat_test_"
+  config.web_console.whitelisted_ips = '192.168.122.1'
 end

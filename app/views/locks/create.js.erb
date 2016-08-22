@@ -1,2 +1,2 @@
 <%= smart_listing_item :locks, :create, @lock,
-                         @lock.persisted? ? "locks/lock" : "locks/form" %>
+                    (@lock && @lock.persisted?) ? "locks/lock" : "locks/form" %>

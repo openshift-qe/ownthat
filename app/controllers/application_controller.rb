@@ -5,5 +5,5 @@ class ApplicationController < ActionController::Base
   include AuthHelper
 
   protect_from_forgery with: :exception
-  before_filter :authz!
+  before_action :authz!
 end

@@ -3,15 +3,6 @@ class LocksController < ApplicationController
   helper  SmartListing::Helper
 
   def index
-    # users_scope = User.active
-
-    # Apply the search control filter.
-    # Note: `like` method here is not built-in Rails scope. You need to define it by yourself.
-    #locks_scope = users_scope.like(params[:filter]) if params[:filter]
-
-    # Apply the credit card checkbox filter
-    # users_scope = users_scope.with_credit_card if params[:with_credit_card] == "1"
-
     locks_scope = Lock.all
     locks_scope = locks_scope.like(params[:filter]) if params[:filter]
 
@@ -20,12 +11,32 @@ class LocksController < ApplicationController
   end
 
   def new
-    # TODO: can we have thid object created only once per server?
     @lock = Lock.new
   end
 
   def create
-    @lock = Lock.create(lock_params)
+    new_params = lock_params
+    @lock = Lock.create(new_params)
+  rescue ActiveRecord::RecordNotUnique
+    # try to update existing record in case it has expired
+    update_params = {
+      owner: new_params[:owner],
+      expires: new_params[:expires]
+    }
+    num_updated = Lock.
+      where(namespace: new_params[:namespace],
+            resource: new_params[:resource]).
+      where("expires < ?", Time.now).
+      update_all(update_params)
+    case num_updated
+    when 1
+      @created = true
+    when 0
+      @created = false
+    else
+      # this should be impossible
+      raise "Unicorns ate the unique database index?"
+    end
   end
 
   def edit
@@ -33,15 +44,32 @@ class LocksController < ApplicationController
   end
 
   def update
-    # puts params
-    @lock = Lock.find(params[:id])
+    if auth_admin?
+      # allow any valid change but concurrency unsafe
+      @lock = Lock.find(params[:id])
+      @lock.update(lock_params)
+      @updated = true
+    else
+      # for non-admin allow only updating reservation time to prevent
+      # lock stealing and other mistakes
+      update_params = lock_params
+      num_updated = Lock.
+        where(owner: update_params[:owner],
+              namespace: update_params[:namespace],
+              resource: update_params[:resource]).
+        update_all(expires: lock_params[:expires],
+                   updated_at: Time.now)
 
-    unless auth_admin? || lock_params[:lock][:owner] == @lock.owner
-      logger.error "owner #{lock_params[:lock][:owner]} tried to steal from #{@lock.owner}: #{@lock.namespace} #{@lock.resource}"
-      authz_forbidden!
+      if num_updated == 1
+        @updated = true
+      elsif num_updated == 0
+        # concurrency issue or not matching owner/resource specification
+        @updated = false
+      else
+        # this should be impossible
+        raise "Unicorns ate the unique database index?"
+      end
     end
-
-    @lock.update(lock_params)
   end
 
   def destroy

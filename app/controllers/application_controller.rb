@@ -4,6 +4,6 @@ class ApplicationController < ActionController::Base
 
   include AuthHelper
 
-  protect_from_forgery with: :exception
+  protect_from_forgery with: :exception, unless: -> { request.format.json? }
   before_action :authz!
 end

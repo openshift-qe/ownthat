@@ -1,2 +1,12 @@
+<%# binding.pry %>
+<%  @lock = @lock.get_by_resource if !@lock.id && @persisted %>
+
+<%#
+  it may happen to override existing row in table if it has expired
+  by the create action, that's why existing records with same id
+  should be removed from table before we insert the new row
+%>
+$("tr[data-id='<%= @lock.id %>']").remove();
+
 <%= smart_listing_item :locks, :create, @lock,
-                    (@lock && @lock.persisted?) ? "locks/lock" : "locks/form" %>
+                    @persisted ? "locks/lock" : "locks/form" %>

@@ -1,2 +1,4 @@
+<%  @lock = @lock.get_by_resource if !@lock.id && @persisted %>
+
 <%= smart_listing_item :locks, :update, @lock,
-                         @lock.valid? ? "locks/lock" : "locks/form" %>
+      (@lock.valid? && @persisted) ? "locks/lock" : "locks/form" %>

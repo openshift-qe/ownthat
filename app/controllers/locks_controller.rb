@@ -16,7 +16,9 @@ class LocksController < ApplicationController
 
   def create
     new_params = lock_params
-    @lock = Lock.create(new_params)
+    @lock = Lock.new(new_params)
+    @lock.save
+    @persisted = true
   rescue ActiveRecord::RecordNotUnique
     # try to update existing record in case it has expired
     update_params = {
@@ -30,9 +32,9 @@ class LocksController < ApplicationController
       update_all(update_params)
     case num_updated
     when 1
-      @created = true
+      @persisted = true
     when 0
-      @created = false
+      @persisted = false
     else
       # this should be impossible
       raise "Unicorns ate the unique database index?"
@@ -48,11 +50,12 @@ class LocksController < ApplicationController
       # allow any valid change but concurrency unsafe
       @lock = Lock.find(params[:id])
       @lock.update(lock_params)
-      @updated = true
+      @persisted = true
     else
       # for non-admin allow only updating reservation time to prevent
       # lock stealing and other mistakes
       update_params = lock_params
+      @lock = Lock.new(update_params)
       num_updated = Lock.
         where(owner: update_params[:owner],
               namespace: update_params[:namespace],
@@ -61,10 +64,10 @@ class LocksController < ApplicationController
                    updated_at: Time.now)
 
       if num_updated == 1
-        @updated = true
+        @persisted = true
       elsif num_updated == 0
         # concurrency issue or not matching owner/resource specification
-        @updated = false
+        @persisted = false
       else
         # this should be impossible
         raise "Unicorns ate the unique database index?"
@@ -84,9 +87,11 @@ class LocksController < ApplicationController
   end
 
   def lock_params
-    if params[:lock][:expires] =~ /(\d+)([smhd])?/
+    if params[:lock][:expires].kind_of?(String) &&
+        params[:lock][:expires] =~ /^(\d+)([smhd])?$/ ||
+        params[:lock][:expires].kind_of?(Numeric)
       # using duration notation
-      count = Integer($1)
+      count = $1 ? Integer($1) : params[:lock][:expires]
       case $2
       when nil, "s"
         # count = count
@@ -98,6 +103,8 @@ class LocksController < ApplicationController
         count = count * 60 * 60 * 24
       end
       params[:lock] = params[:lock].merge({expires: Time.now + count})
+    elsif params[:lock][:expires].kind_of?(String)
+      params[:lock][:expires] = Time.parse params[:lock][:expires]
     end
 
     params.require(:lock).permit(:namespace, :resource, :expires, :owner)

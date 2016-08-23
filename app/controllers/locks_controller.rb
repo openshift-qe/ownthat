@@ -17,8 +17,11 @@ class LocksController < ApplicationController
   def create
     new_params = lock_params
     @lock = Lock.new(new_params)
-    @lock.save
-    @persisted = true
+    if @lock.save
+      @persisted = true
+    else
+      @errors = @lock.errors.full_messages
+    end
   rescue ActiveRecord::RecordNotUnique
     # try to update existing record in case it has expired
     update_params = {
@@ -35,10 +38,13 @@ class LocksController < ApplicationController
       @persisted = true
     when 0
       @persisted = false
+      @errors = [%Q{lock on "#{new_params[:namespace]}" / "#{new_params[:resource]}" already exists and non-expired}]
     else
       # this should be impossible
       raise "Unicorns ate the unique database index?"
     end
+  rescue => e
+    @errors = [e.inspect]
   end
 
   def edit
@@ -49,8 +55,11 @@ class LocksController < ApplicationController
     if auth_admin?
       # allow any valid change but concurrency unsafe
       @lock = Lock.find(params[:id])
-      @lock.update(lock_params)
-      @persisted = true
+      if @lock.update(lock_params)
+        @persisted = true
+      else
+        @errors = @lock.errors.full_messages
+      end
     else
       # for non-admin allow only updating reservation time to prevent
       # lock stealing and other mistakes
@@ -60,7 +69,7 @@ class LocksController < ApplicationController
         where(owner: update_params[:owner],
               namespace: update_params[:namespace],
               resource: update_params[:resource]).
-        update_all(expires: lock_params[:expires],
+        update_all(expires: update_params[:expires],
                    updated_at: Time.now)
 
       if num_updated == 1
@@ -73,6 +82,8 @@ class LocksController < ApplicationController
         raise "Unicorns ate the unique database index?"
       end
     end
+  rescue => e
+    @errors = [e.inspect]
   end
 
   def destroy

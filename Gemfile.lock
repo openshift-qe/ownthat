@@ -105,6 +105,7 @@ GEM
     nokogiri (1.6.8)
       mini_portile2 (~> 2.1.0)
       pkg-config (~> 1.1.7)
+    notifyjs_rails (0.0.2)
     pkg-config (1.1.7)
     pry (0.10.4)
       coderay (~> 1.1.0)
@@ -195,6 +196,7 @@ DEPENDENCIES
   json
   listen (~> 3.0.5)
   mysql2 (>= 0.3.18, < 0.5)
+  notifyjs_rails
   pry-rails
   puma (~> 3.0)
   rails (~> 5.0.0)

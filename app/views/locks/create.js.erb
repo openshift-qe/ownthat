@@ -8,5 +8,7 @@
 %>
 $("tr[data-id='<%= @lock.id %>']").remove();
 
+<%= render(:partial => "error") %>
+
 <%= smart_listing_item :locks, :create, @lock,
                     @persisted ? "locks/lock" : "locks/form" %>

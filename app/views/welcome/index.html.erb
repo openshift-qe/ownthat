@@ -7,10 +7,52 @@ resource allocations from a database pool.
 
 It also allows you to manually update/remove locks and managing resourse
 pools.
+
+Find source at <a href="https://github.com/akostadinov/ownthat/">GitHub</a>.
 </p>
 
-<ul>
-  <li><%= link_to "Locks", locks_path %></li>
-</ul>
+<h2>Authentication</h2>
+<p>
+Presently app supports two kind of users - admin and regular users. Admins can
+manage all resources using the web UI. Regular users can only issue create and
+update JSON API calls.
+</p>
 
-TODO: links to interesting stuff and more info
+<h2>Using the web UI</h2>
+<p>
+  Using the web UI you as admin you can:
+  <ul>
+    <li>Manage <%= link_to "Locks", locks_path %></li>
+  </ul>
+</p>
+
+<h2>Using the JSON API</h2>
+<p>
+To create a lock as normal user you can issue the following calls:
+<pre><code>curl -v -H "Accept: application/json" -H "Content-type: application/json" -X POST -u user:password <%= File.join(root_url, url_for(locks_path)) %> -d '{"lock":{"namespace":"curl", "resource":"curl_1", "owner":"curl_user", "expires":"1d"}}'
+</code></pre>
+To update a lock as normal user you can issue the following calls:
+<pre><code>curl -v -H "Accept: application/json" -H "Content-type: application/json" -X PATCH -u user:password <%= File.join(root_url, url_for(update_by_values_path)) %> -d '{"lock":{"namespace":"curl", "resource":"curl_1", "owner":"curl_user", "expires":"1d"}}'
+</code></pre>
+Please note that on update, you should specify all fields although you can only
+update the <code>expites</code> field. This is to avoid unintentional stealing
+of locks. If user is worried of intentional lock stealing, adding a random
+string to <code>owner</code> at time of lock creation would probably do the job.
+</p>
+<p>
+  When call is successful, <code>200 OK</code> is returned along with json
+  representation of the lock.
+  <pre><code>{"namespace":"curl","resource":"curl_1","expires":"2016-08-25T15:21:45.000Z","owner":"curl_user"}</code></pre>
+  Otherwise non-2xx status code is returned with a
+  list of error messages.
+  <pre><code>{"messages":["lock on \"curl\" / \"curl_1\" already exists and non-expired"]}'</code></pre>
+</p>
+<p>
+You can set <code>expired</code> field in different ways. One is any format
+recognized by Ruby <code>Time#parse</code>. Another approach is to specify
+how long you want the lock kept. It can be a number (e.g. 600) to have lock
+valid for 60 seconds from now. Or you can use a number + a suffix
+(<code>m</code>,<code>h</code>,<code>d</code>), to denote number of minutes,
+hours or days respectively, e.g. <script>2h</script> would mean lock is valid
+for two days.
+</p>

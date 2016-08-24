@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   root 'welcome#index'
 
   resources :locks
-  match '/locks/by_values(.:format)' => 'locks#update', via: [:put, :patch] #, as: "update_by_values"
+  match '/locks/by_values(.:format)' => 'locks#update', via: [:put, :patch], as: "update_by_values"
   # put   '/locks/by_values(.:format)' => 'locks#update'
   resources :pools
 

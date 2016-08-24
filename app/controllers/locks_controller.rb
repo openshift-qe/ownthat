@@ -17,10 +17,11 @@ class LocksController < ApplicationController
   def create
     new_params = lock_params
     @lock = Lock.new(new_params)
-    if @lock.save
+    if @lock.save skip_transaction: true
       @persisted = true
     else
       @errors = @lock.errors.full_messages
+      render status: :bad_request
     end
   rescue ActiveRecord::RecordNotUnique
     # try to update existing record in case it has expired
@@ -39,12 +40,14 @@ class LocksController < ApplicationController
     when 0
       @persisted = false
       @errors = [%Q{lock on "#{new_params[:namespace]}" / "#{new_params[:resource]}" already exists and non-expired}]
+      render status: :conflict
     else
       # this should be impossible
       raise "Unicorns ate the unique database index?"
     end
   rescue => e
     @errors = [e.inspect]
+    render status: :internal_server_error
   end
 
   def edit
@@ -52,13 +55,14 @@ class LocksController < ApplicationController
   end
 
   def update
-    if auth_admin?
+    if params[:id] && auth_admin?
       # allow any valid change but concurrency unsafe
       @lock = Lock.find(params[:id])
       if @lock.update(lock_params)
         @persisted = true
       else
         @errors = @lock.errors.full_messages
+        render status: :bad_request
       end
     else
       # for non-admin allow only updating reservation time to prevent
@@ -77,13 +81,19 @@ class LocksController < ApplicationController
       elsif num_updated == 0
         # concurrency issue or not matching owner/resource specification
         @persisted = false
+        @errors = ["conflict with existing lock or not matching namespace/resource/owner"]
+        render status: :conflict
       else
         # this should be impossible
         raise "Unicorns ate the unique database index?"
       end
     end
+  rescue ActiveRecord::RecordNotUnique
+    @errors = [%Q{lock already exists}]
+    render status: :conflict
   rescue => e
     @errors = [e.inspect]
+    render status: :internal_server_error
   end
 
   def destroy

@@ -1,32 +1,29 @@
-- unless smart_listing.empty?
-  = smart_listing_controls_for(:locks, {class: "form-inline text-right"}) do
-    .form-group.filter.input-append
-      = text_field_tag :filter, '', class: "search form-control", placeholder: "Search...", autocomplete: :off
-    %button.btn.btn-primary.disabled{type: :submit}
-      %span.glyphicon.glyphicon-search
+= smart_listing_controls_for(:locks, {class: "form-inline text-right"}) do
+  .form-group.filter.input-append
+    = text_field_tag :filter, '', class: "search form-control", placeholder: "Search...", autocomplete: :off
+  %button.btn.btn-primary.disabled{type: :submit}
+    %span.glyphicon.glyphicon-search
 
-  %table.table.table-striped{id: "locks-list"}
-    %thead
-      -# see https://github.com/Sology/smart_listing/issues/96
-      %th.col-md-3= smart_listing.sortable "Namespace", :namespace
-      %th.col-md-3= smart_listing.sortable "Resource", "resource"
-      %th.col-md-3= smart_listing.sortable "Owner", "owner"
-      %th.col-md-3= smart_listing.sortable "Expires", "expires"
-      -#%th.col-md-3= "Namespace"
-      -#%th.col-md-3= "Resource"
-      -#%th.col-md-3= "Owner"
-      -#%th.col-md-3= "Expires"
-    %tbody
-      - smart_listing.collection.each do |o|
-        %tr.editable.clickable-row{data: {id: o.id}}
-          = smart_listing.render object: o, partial: "locks/lock", locals: {object: o}
-      = smart_listing.item_new colspan: 6, link: new_lock_path
+%table.table.table-striped{id: "locks-list"}
+  %thead
+    -# see https://github.com/Sology/smart_listing/issues/96
+    %th.col-md-3= smart_listing.sortable "Namespace", :namespace
+    %th.col-md-3= smart_listing.sortable "Resource", "resource"
+    %th.col-md-3= smart_listing.sortable "Owner", "owner"
+    %th.col-md-3= smart_listing.sortable "Expires", "expires"
+    -#%th.col-md-3= "Namespace"
+    -#%th.col-md-3= "Resource"
+    -#%th.col-md-3= "Owner"
+    -#%th.col-md-3= "Expires"
+  %tbody
+    - smart_listing.collection.each do |o|
+      %tr.editable.clickable-row{data: {id: o.id}}
+        = smart_listing.render object: o, partial: "locks/lock", locals: {object: o}
+    = smart_listing.item_new colspan: 6, link: new_lock_path
 
-  -# TODO: implement operations over selected rows
-  = javascript_include_tag "selectable-table"
+-# TODO: implement operations over selected rows
+= javascript_include_tag "selectable-table"
 
-  -# Render nice pagination links fitted for Bootstrap 3 by default
-  = smart_listing.paginate
-  = smart_listing.pagination_per_page_links
-- else
-  %p.warning No records!
+-# Render nice pagination links fitted for Bootstrap 3 by default
+= smart_listing.paginate
+= smart_listing.pagination_per_page_links

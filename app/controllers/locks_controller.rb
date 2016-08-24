@@ -4,7 +4,9 @@ class LocksController < ApplicationController
 
   def index
     locks_scope = Lock.all
-    locks_scope = locks_scope.like(params[:filter]) if params[:filter]
+    if params[:filter] && !params[:filter].empty?
+      locks_scope = locks_scope.like(params[:filter]) if params[:filter]
+    end
 
     @locks = smart_listing_create :locks, locks_scope, partial: "locks/list",
       default_sort: {namespace: "asc", resource: "asc"}

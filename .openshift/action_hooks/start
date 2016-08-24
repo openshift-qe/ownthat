@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e -x
+
+pwd
+
+unset GEM_HOME
+
+set +x +e
+. "$OPENSHIFT_DATA_DIR"/rvm/scripts/rvm
+set -x -e
+
+cd "$OPENSHIFT_REPO_DIR"
+
+export RAILS_SERVE_STATIC_FILES=true
+bin/rails s -e production -d -p $OPENSHIFT_DIY_PORT -b $OPENSHIFT_DIY_IP --pid="$OPENSHIFT_DATA_DIR"/puma.pid

@@ -1,0 +1,40 @@
+#!/bin/bash
+
+set -e -x
+
+pwd
+
+unset GEM_HOME
+export GNUPGHOME="$OPENSHIFT_DATA_DIR"/gpg
+export RAILS_ENV=production
+
+if [ ! -f "$OPENSHIFT_DATA_DIR"/rvm/scripts/rvm ]; then
+  mkdir "$GNUPGHOME"
+  chmod 700 "$GNUPGHOME"
+  gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+
+  set +x +e
+  echo installing RVM and Ruby
+  curl -sSL https://get.rvm.io | bash -s stable --path "$OPENSHIFT_DATA_DIR"/rvm
+  . "$OPENSHIFT_DATA_DIR"/rvm/scripts/rvm
+  sed -i "$OPENSHIFT_DATA_DIR"/rvm/scripts/functions/detect_system -e 's/-RedHat/-CentOS/'
+  cat >> "$OPENSHIFT_DATA_DIR"/rvm/scripts/functions/requirements/centos <<EOF
+  requirements_centos_before_update() { return 0; }
+  requirements_centos_libs_install() { return 0; }
+  requirements_centos_before_install_epel() { return 0; }
+  requirements_centos_before_update_check_epel() { return 0; }
+EOF
+  rvm install ruby-2.3.1
+  set -x -e
+else
+  set +x +e
+  . "$OPENSHIFT_DATA_DIR"/rvm/scripts/rvm
+  set -x -e
+fi
+
+cd "$OPENSHIFT_REPO_DIR"
+
+bundle help &> /dev/null || gem install bundler
+bundle check || bundle install --without development test
+
+bin/rails assets:precompile

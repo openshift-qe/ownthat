@@ -1,11 +1,8 @@
 class LocksController < ApplicationController
-  include SmartListing::Helper::ControllerExtensions
-  helper  SmartListing::Helper
-
   def index
     locks_scope = Lock.all
     if params[:filter] && !params[:filter].empty?
-      locks_scope = locks_scope.like(params[:filter]) if params[:filter]
+      locks_scope = locks_scope.like(params[:filter])
     end
 
     @locks = smart_listing_create :locks, locks_scope, partial: "locks/list",

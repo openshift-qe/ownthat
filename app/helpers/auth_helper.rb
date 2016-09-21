@@ -33,9 +33,11 @@ module AuthHelper
           ["create", "update", "lock_from_pool"].include?(params["action"])
         return nil
       else
+        logger.warn "regular user calling forbidden methods"
         authz_forbidden!
       end
     else
+      logger.warn "unhandled user role #{authz_role}"
       authz_forbidden!
     end
   end

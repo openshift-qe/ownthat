@@ -38,3 +38,4 @@ bundle help &> /dev/null || gem install bundler
 bundle check || bundle install --without development test
 
 bin/rails assets:precompile
+bin/rails db:migrate

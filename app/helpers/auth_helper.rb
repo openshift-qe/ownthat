@@ -1,20 +1,17 @@
 require 'json'
 
 module AuthHelper
+  attr_reader :authz_role
+
   def authz!
-    authenticate_with_http_basic do |user, password|
-      @authz_role = AuthHelper.role(user, password)
-      authorize_role!
+    @authz_role = authenticate_with_http_basic do |user, password|
+      AuthHelper.role(user, password)
     end
-    return !!authz_role # make sure we found a role
+    authorize_role!
   end
 
   def authz_again!
-    request_http_basic_authentication
-  end
-
-  def authz_role
-    @authz_role || authz_again!
+    request_http_basic_authentication('OwnThat')
   end
 
   def authz_forbidden!
@@ -26,18 +23,18 @@ module AuthHelper
     when nil
       authz_again!
     when :admin
-      return nil
+      return
     when :user
       params = request.filtered_parameters
       if params["controller"] == "locks" &&
           ["create", "update", "lock_from_pool"].include?(params["action"])
-        return nil
+        return
       else
         logger.warn "regular user calling forbidden methods"
         authz_forbidden!
       end
     else
-      logger.warn "unhandled user role #{authz_role}"
+      logger.warn "unhandled user role '#{authz_role}'"
       authz_forbidden!
     end
   end
@@ -50,12 +47,12 @@ module AuthHelper
     authz_role == :user
   end
 
+  # using class methods/variables to avoid parsing auth db multiple times
   def self.role(user, password)
     authz_db.each do |role, users|
-      users.each do |u, p|
-        return role.to_sym if u == user && p == password
-      end
+      return role.to_sym if users[user] == password
     end
+    return nil
   end
 
   private_class_method def self.authz_db
@@ -63,7 +60,7 @@ module AuthHelper
   end
 
   private_class_method def self.load_rules
-    @rules ||= JSON.parse(ENV['AUTHZ_DB'])
+    JSON.parse(ENV['AUTHZ_DB'])
   rescue => e
     raise "bad authentication data configured for app"
   end

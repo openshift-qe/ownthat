@@ -34,8 +34,10 @@ fi
 
 cd "$OPENSHIFT_REPO_DIR"
 
-bundle help &> /dev/null || gem install bundler
-bundle check || bundle install --without development test
+scl='scl enable nodejs010'
 
-bin/rails assets:precompile
-bin/rails db:migrate
+bundle help &> /dev/null || gem install bundler
+bundle check || $scl "bundle install --without development test"
+
+$scl "bin/rails assets:precompile"
+$scl "bin/rails db:migrate"

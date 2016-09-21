@@ -1,0 +1,6 @@
+$("tr[data-id='<%= @pool.id %>']").remove();
+
+<%= render(:partial => "error") %>
+
+<%= smart_listing_item :pools, :create, @pool,
+                    @pool.persisted? ? "pools/pool" : "pools/form" %>

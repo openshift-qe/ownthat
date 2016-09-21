@@ -1,0 +1,29 @@
+%td{colspan: 6}
+  = form_for object, url: object.new_record? ? pools_path : pool_path(object),
+                     remote: true, html: {class: "form-horizontal"} do |f|
+
+    -# Form fields go here...
+      %div
+      Namespace:
+      = f.text_field :namespace
+      %div
+      Resource:
+      = f.text_field :resource
+      %div
+      Owner:
+      = f.text_field :owner
+      %div
+      Expires:
+      = f.text_field :expires
+    %p
+      Namespace:
+      = f.text_field(:name)
+      Resource:
+      = f.text_field :resource
+      Active:
+      = f.check_box :active, {}, true, false
+      Note:
+      = f.text_field :note
+
+      = f.submit "Save", class: "btn btn-primary"
+      %button.btn.btn-link.cancel Cancel

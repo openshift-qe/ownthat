@@ -30,7 +30,7 @@ module AuthHelper
     when :user
       params = request.filtered_parameters
       if params["controller"] == "locks" &&
-          ["create", "update"].include?(params["action"])
+          ["create", "update", "lock_from_pool"].include?(params["action"])
         return nil
       else
         authz_forbidden!

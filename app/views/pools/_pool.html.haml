@@ -1,0 +1,12 @@
+%td= object.name
+%td= object.resource
+%td
+  - if object.active
+    %span.glyphicon.glyphicon-ok
+  - else
+    %span.glyphicon.glyphicon-remove
+%td= object.note
+-# %td= format_datetime object.expires TODO: format iso
+%td.actions= smart_listing_item_actions [{name: :edit, url: edit_pool_path(object)}, {name: :destroy, url: pool_path(object), confirmation: "Are you sure you want to delete this pool element?"}]
+
+

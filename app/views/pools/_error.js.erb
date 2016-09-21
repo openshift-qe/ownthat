@@ -1,0 +1,4 @@
+<% [@errors ||= []].flatten.each do |error| %>
+  // $(".new-item-placeholder").notify("test", {autoHide: false, className: 'error', position:"top"});
+  $.notify(<%= error.to_json.html_safe() %>, {autoHide: false, className: 'error', position:"top center"});
+<% end %>

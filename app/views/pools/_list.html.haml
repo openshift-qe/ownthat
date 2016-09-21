@@ -7,11 +7,10 @@
 %table.table.table-striped{id: "pools-list"}
   %thead
     %tr
-      -# see https://github.com/Sology/smart_listing/issues/96
-      %th.col-md-3= smart_listing.sortable "Pool", :name
-      %th.col-md-3= smart_listing.sortable "Resource", "resource"
-      %th.col-md-3= smart_listing.sortable raw('<span class="glyphicon glyphicon-ok-sign" title="active"></span>'), "active"
-      %th.col-md-3= "Notes"
+      %th.col-md-2= smart_listing.sortable "Pool", :name
+      %th.col-md-5= smart_listing.sortable "Resource", "resource"
+      %th= smart_listing.sortable raw('<span class="glyphicon glyphicon-ok-sign" title="active"></span>'), "active"
+      %th.col-md-4= "Notes"
   %tbody
     - smart_listing.collection.each do |o|
       %tr.editable.clickable-row{data: {id: o.id}}

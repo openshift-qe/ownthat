@@ -2,8 +2,11 @@ class Pool < ApplicationRecord
   validates :name, length: { minimum: 1 }
   validates :resource, length: { minimum: 1 }
 
+  scope :pool, -> (name) { where(name: name) }
+
   # should we use SQL99 "SIMILAR TO" operator? Not yet, harder to escape.
   scope :like, -> (filter) { where("name like ? OR resource like ?", "%#{filter}%", "%#{filter}%")}
+
 
   # when we want to construct persisted object without invalidating DB cache
   #def get_by_resource

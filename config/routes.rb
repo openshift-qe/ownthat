@@ -6,7 +6,7 @@ Rails.application.routes.draw do
   match '/locks/by_values(.:format)' => 'locks#update', via: [:put, :patch], as: "update_by_values"
   # put   '/locks/by_values(.:format)' => 'locks#update'
 
-  post '/locks/from_pool(.:format)' => 'locks#lock_from_pool'
+  post '/locks/from_pool(.:format)' => 'locks#lock_from_pool', as: "create_from_pool"
 
   resources :pools
 

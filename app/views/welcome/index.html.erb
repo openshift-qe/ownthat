@@ -39,6 +39,9 @@ update the <code>expites</code> field. This is to avoid unintentional stealing
 of locks. If user is worried of intentional lock stealing, adding a random
 string to <code>owner</code> at time of lock creation would probably do the job.
 </p>
+To create a lock from a pool you can perform the following calls:
+<pre><code>curl -v -H "Accept: application/json" -H "Content-type: application/json" -X PATCH -u user:password <%= File.join(root_url, url_for(create_from_pool_path)) %> -d '{"lock":{"namespace":"curl", "poolname":"ldapusers", "owner":"curl_user", "expires":"1d"}}'
+</code></pre>
 <p>
   When call is successful, <code>200 OK</code> is returned along with json
   representation of the lock.

@@ -6,15 +6,16 @@
 
 %table.table.table-striped{id: "locks-list"}
   %thead
-    -# see https://github.com/Sology/smart_listing/issues/96
-    %th.col-md-3= smart_listing.sortable "Namespace", :namespace
-    %th.col-md-3= smart_listing.sortable "Resource", "resource"
-    %th.col-md-3= smart_listing.sortable "Owner", "owner"
-    %th.col-md-3= smart_listing.sortable "Expires", "expires"
-    -#%th.col-md-3= "Namespace"
-    -#%th.col-md-3= "Resource"
-    -#%th.col-md-3= "Owner"
-    -#%th.col-md-3= "Expires"
+    %tr
+      -# see https://github.com/Sology/smart_listing/issues/96
+      %th.col-md-3= smart_listing.sortable "Namespace", :namespace
+      %th.col-md-3= smart_listing.sortable "Resource", "resource"
+      %th.col-md-3= smart_listing.sortable "Owner", "owner"
+      %th.col-md-3= smart_listing.sortable "Expires", "expires"
+      -#%th.col-md-3= "Namespace"
+      -#%th.col-md-3= "Resource"
+      -#%th.col-md-3= "Owner"
+      -#%th.col-md-3= "Expires"
   %tbody
     - smart_listing.collection.each do |o|
       %tr.editable.clickable-row{data: {id: o.id}}

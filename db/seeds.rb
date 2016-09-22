@@ -9,3 +9,7 @@
 23.times do |i|
   Lock.create!(namespace: "testnamespace", resource: "testresource_#{i}", owner: "testowner", expires: Time.now + rand(36000))
 end
+
+5.times do |i|
+  Pool.create!(name: "testpool", resource: "testresource_#{i}", active: (i % 2 == 0), note: (i % 2 == 0) ? nil : "some note #{i}")
+end

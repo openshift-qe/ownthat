@@ -65,3 +65,5 @@ Usually one can use the `--from-code "https://github.com/akostadinov/ownthat.git
 So I fugured I can create a DIY app without code and then import app code.
 In that way during `git push` you can see what is going on with the hooks as
 well it now allows more time for the operations to complete.
+
+FYI the only needed change to run under OpenShift was creation of the action hooks under the `openshift` directory.

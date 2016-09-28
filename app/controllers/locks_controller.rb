@@ -219,6 +219,10 @@ class LocksController < ApplicationController
       params[:lock][:expires] = Time.parse params[:lock][:expires]
     end
 
+    if params[:poolname]
+      params[:lock][:poolname] ||= params[:poolname]
+    end
+
     if params[:lock][:resource] && params[:lock][:poolname]
       raise "poolname and resource specified simultaneously"
     end

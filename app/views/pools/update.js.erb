@@ -1,5 +1,5 @@
 <%= render(:partial => "error") %>
 
-<% if @pool.valid? && @pool.persisted? %>
+<% if @pool.valid? && @pool.changed.empty? %>
   <%= smart_listing_item :pools, :update, @pool, "pools/pool" %>
 <% end %>

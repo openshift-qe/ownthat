@@ -35,6 +35,9 @@ To create a lock as normal user you can issue the following calls:
 To update a lock as normal user you can issue the following calls:
 <pre><code>curl -v -H "Accept: application/json" -H "Content-type: application/json" -X PATCH -u user:password <%= File.join(root_url, url_for(update_by_values_path)) %> -d '{"namespace":"curl", "resource":"curl_1", "owner":"curl_user", "expires":"1d"}'
 </code></pre>
+To disable a pool as normal user you can issue the following calls:
+<pre><code>curl -v -H "Accept: application/json" -H "Content-type: application/json" -X PATCH -u user:password <%= File.join(root_url, url_for(disable_pool_path)) %> -d '{"name":"curl", "resource":"curl_1"}'
+</code></pre>
 Please note that on update, you should specify all fields although you can only
 update the <code>expites</code> field. This is to avoid unintentional stealing
 of locks. If user is worried of intentional lock stealing, adding a random

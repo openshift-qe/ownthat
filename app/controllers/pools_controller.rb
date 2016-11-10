@@ -22,10 +22,14 @@ class PoolsController < ApplicationController
       @errors = @pool.errors.full_messages
       render status: :bad_request
     end
+  rescue
+    handle_error($!)
   end
 
   def edit
     @pool = Pool.find(params[:id])
+  rescue
+    handle_error($!)
   end
 
   def update
@@ -36,15 +40,24 @@ class PoolsController < ApplicationController
       @errors = @pool.errors.full_messages
       render status: :bad_request
     end
+  rescue
+    handle_error($!)
   end
 
   def destroy
     @pool = Pool.find(params[:id])
     @pool.destroy
+  rescue
+    handle_error($!)
   end
 
   private
   def pool_params
     params.require(:pool).permit(:name, :resource, :active, :note)
+  end
+
+  def handle_error(e)
+    @errors = [e.inspect]
+    log_error(e)
   end
 end

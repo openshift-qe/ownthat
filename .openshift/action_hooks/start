@@ -13,4 +13,6 @@ set -x -e
 cd "$OPENSHIFT_REPO_DIR"
 
 export RAILS_SERVE_STATIC_FILES=true
-scl enable nodejs010 'bin/rails s -e production -d -p $OPENSHIFT_DIY_PORT -b $OPENSHIFT_DIY_IP --pid="$OPENSHIFT_DATA_DIR"/puma.pid'
+export RAILS_LOG_TO_STDOUT=true
+
+nohup scl enable nodejs010 'bin/rails s -e production -p $OPENSHIFT_DIY_PORT -b $OPENSHIFT_DIY_IP --pid="$OPENSHIFT_DATA_DIR"/puma.pid' |& /usr/bin/logshifter -tag ownthat & disown

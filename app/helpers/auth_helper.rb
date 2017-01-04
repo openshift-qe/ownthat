@@ -27,7 +27,9 @@ module AuthHelper
     when :user
       params = request.filtered_parameters
       if params["controller"] == "locks" &&
-          ["create", "update", "lock_from_pool"].include?(params["action"])
+          ["create", "update", "lock_from_pool"].include?(params["action"]) ||
+         params["controller"] == "pools" &&
+          ["disable"].include?(params["action"])
         return
       else
         logger.warn "regular user calling forbidden methods"

@@ -44,6 +44,28 @@ class PoolsController < ApplicationController
     handle_error($!)
   end
 
+  def disable
+    update_params = pool_params
+    update_params[:active] = false
+    @pool = Pool.new(update_params)
+    num_disabled = Pool.
+      where(       name: update_params[:name],
+               resource: update_params[:resource]).
+      update_all(active: update_params[:active],
+             updated_at: Time.now)
+    if num_disabled == 1
+      @persisted = true
+    elsif num_disabled == 0
+      # concurrency issue or not matching name/resource specification
+      @persisted = false
+      @errors = ["conflict with existing pool or not matching name/resource"]
+      render status: :conflict
+    else
+      # this should be impossible
+      raise "Unicorns ate the unique database index?"
+    end
+  end
+
   def destroy
     @pool = Pool.find(params[:id])
     @pool.destroy

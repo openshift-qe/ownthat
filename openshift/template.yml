@@ -1,0 +1,206 @@
+apiVersion: v1
+kind: Template
+metadata:
+  creationTimestamp: null
+  name: ownthat
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: "${APP_NAME}"
+      name: "${APP_NAME}"
+    name: "${APP_NAME}"
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "${APP_NAME}:latest"
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        uri: https://github.com/openshift-qe/ownthat.git
+      # sourceSecret:
+      #  name: gitlabsecret
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: ruby:2.3
+          namespace: openshift
+      type: Source
+    triggers:
+    - generic:
+        allowEnv: true
+        secret: "${APP_NAME}"
+      type: Generic
+    - imageChange: {}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: "${APP_NAME}"
+    name: "${APP_NAME}"
+  spec:
+    replicas: 0
+    selector:
+      name: "${APP_NAME}"
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: "${APP_NAME}"
+          name: "${APP_NAME}"
+      spec:
+        containers:
+        - env:
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                key: dbUser
+                name: "${SECRET_NAME}"
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: dbPassword
+                name: "${SECRET_NAME}"
+          - name: MYSQL_HOST
+            valueFrom:
+              secretKeyRef:
+                key: dbHost
+                name: "${SECRET_NAME}"
+          - name: MYSQL_DB
+            valueFrom:
+              secretKeyRef:
+                key: dbName
+                name: "${SECRET_NAME}"
+          - name: PUMA_WORKERS
+            value: "3"
+          - name: AUTHZ_DB
+            valueFrom:
+              secretKeyRef:
+                key: auth
+                name: "${SECRET_NAME}"
+          - name: SECRET_KEY_BASE
+            valueFrom:
+              secretKeyRef:
+                key: secretKeyBase
+                name: "${SECRET_NAME"
+          - name: ALLOW_INSECURE
+            value: "1"
+          image: " "
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 1
+          name: "${APP_NAME}"
+          readinessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            requests:
+              memory: 512Mi
+          securityContext:
+            capabilities: {}
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - "${APP_NAME}"
+        from:
+          kind: ImageStreamTag
+          name: "${APP_NAME}:latest"
+          namespace: "${NAMESPACE}"
+      type: ImageChange
+    - type: ConfigChange
+- kind: "ImageStream"
+  apiVersion: "v1"
+  metadata:
+    name: "${APP_NAME}"
+    labels:
+    app: "${APP_NAME}"
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: "${APP_NAME}"
+    name: "${APP_NAME}"
+  spec:
+    to:
+      kind: Service
+      name: "${APP_NAME}"
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    labels:
+      app: "${APP_NAME}"
+    name: "${APP_NAME}"
+  spec:
+    ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      name: "${APP_NAME}"
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+parameters:
+- name: APP_NAME
+  description: "The name assigned to all of the frontend objects defined in this template."
+  displayName: Name
+  required: true
+  value: ownthat
+- name: SECRET_NAME
+  description: secret to use for DB, auth and secret key base
+  displayName: Secret Name
+  required: true
+  value: ownthat
+- name: "NAMESPACE"
+  displayName: "Namespace"
+  required: true
+  description: "The OpenShift Namespace where the ImageStream resides."

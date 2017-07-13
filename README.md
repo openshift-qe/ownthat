@@ -29,6 +29,14 @@ TODO: document the following:
 
 * ...
 
+## Deploying on OpenShift 3.x
+```
+oc create -f openshift/secret.yml # first edit the file
+oc process -f openshift/template.yml | oc create -f -
+oc start-build ownthat
+oc scale --replicas=1 dc/ownthat
+```
+
 ## Deploying on OpenShift 2.x
 
 Note that OpenShift v2 is now superceded by

@@ -101,7 +101,9 @@ objects:
             valueFrom:
               secretKeyRef:
                 key: secretKeyBase
-                name: "${SECRET_NAME"
+                name: "${SECRET_NAME}"
+          - name: RAILS_SERVE_STATIC_FILES
+            value: "1"
           - name: ALLOW_INSECURE
             value: "1"
           image: " "
@@ -118,6 +120,9 @@ objects:
           readinessProbe:
             failureThreshold: 2
             httpGet:
+              httpHeaders:
+              - name: Accept
+                value: '*/*'
               path: /healthz
               port: 8080
               scheme: HTTP
@@ -145,7 +150,6 @@ objects:
         from:
           kind: ImageStreamTag
           name: "${APP_NAME}:latest"
-          namespace: "${NAMESPACE}"
       type: ImageChange
     - type: ConfigChange
 - kind: "ImageStream"
@@ -200,7 +204,3 @@ parameters:
   displayName: Secret Name
   required: true
   value: ownthat
-- name: "NAMESPACE"
-  displayName: "Namespace"
-  required: true
-  description: "The OpenShift Namespace where the ImageStream resides."

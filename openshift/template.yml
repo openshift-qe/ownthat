@@ -167,6 +167,9 @@ objects:
       app: "${APP_NAME}"
     name: "${APP_NAME}"
   spec:
+    tls:
+      insecureEdgeTerminationPolicy: Redirect
+      termination: edge
     to:
       kind: Service
       name: "${APP_NAME}"
